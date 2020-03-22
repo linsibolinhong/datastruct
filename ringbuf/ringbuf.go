@@ -211,9 +211,91 @@ func (r *RingBuffer) ReadWithOffset(n, offset int) ([]byte, int) {
 	return ret, n
 }
 
+func (r *RingBuffer) RemoveAt(idx, n int) (ret int) {
+	if r.isEmpty {
+		return 0
+	}
 
+	if n == 0 {
+		return 0
+	}
 
+	defer func() {
+		if ret > 0 {
+			r.isEmpty = r.begin == r.end
+		}
+	}()
 
+	if idx < 0 || idx >= r.Size() {
+		return -1
+	}
 
+	if r.UsedSize() < n {
+		return -1
+	}
+
+	if r.Begin() < r.End() {
+		if idx >= r.End() || idx < r.Begin() {
+			return -1
+		}
+
+		if r.End() - idx < n {
+			return -1
+		}
+
+		copy(r.buf[idx:], r.buf[idx+n:r.End()])
+		r.end = r.end - n
+		return n
+	} else {
+		if idx >= r.End() && idx < r.Begin() {
+			return -1
+		}
+
+		if idx >= r.Begin() {
+			if r.End() + r.Size() - idx < n {
+				return -1
+			}
+
+			if n + idx < r.Size() {
+				copy(r.buf[idx:], r.buf[idx+n:])
+				if n < r.End() {
+					copy(r.buf[:], r.buf[n:r.End()])
+					r.end -= n
+				} else {
+					r.end = r.End() + r.Size() - idx + n
+				}
+				return n
+			} else {
+				copy(r.buf[idx:], r.buf[(idx+n)%r.Size():r.End()])
+				r.end -= n
+				if r.end < 0 {
+					r.end += r.Size()
+				}
+				return n
+			}
+		} else {
+			if n <= r.End() - idx {
+				copy(r.buf[idx:], r.buf[idx+n:r.End()])
+				r.end -= n
+				return n
+			} else {
+				return -1
+			}
+		}
+	}
+}
+
+func (r *RingBuffer) Remove(offset, n int) int {
+	if n < 0 || n >= r.Size() {
+		return -1
+	}
+	return r.RemoveAt((r.begin + offset) % r.Size(), n)
+}
+
+func (r *RingBuffer) Clear() {
+	r.begin = 0
+	r.end = 0
+	r.isEmpty = true
+}
 
 

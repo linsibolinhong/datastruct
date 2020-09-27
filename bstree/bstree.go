@@ -124,21 +124,29 @@ func (node *BSTreeNode) DeleteNode() *BSTreeNode {
 	}
 }
 
-func (t *BSTreeNode) Delete(val compare.Comparer) (*BSTreeNode, bool) {
+func (t *BSTreeNode) Find(val compare.Comparer) *BSTreeNode {
 	if t == nil {
-		return nil, false
+		return nil
 	}
 
 	c := t.Value.Compare(val)
 	if c == 0 {
-		return t.DeleteNode(), true
+		return t
 	}
 
 	if c > 0 {
-		return t.Left.Delete(val)
+		return t.Left.Find(val)
 	}
 
-	return t.Right.Delete(val)
+	return t.Right.Find(val)
+}
+
+func (t *BSTreeNode) Delete(val compare.Comparer) (*BSTreeNode, bool) {
+	node := t.Find(val)
+	if node == nil {
+		return nil, false
+	}
+	return node.DeleteNode(), true
 }
 
 type BSTree interface {
@@ -178,6 +186,10 @@ func (t *BasicBSTree) Search(val compare.Comparer) compare.Comparer {
 		return nil
 	}
 
+	node := t.Root.Find(val)
+	if node != nil {
+		return node.Value
+	}
 	return nil
 }
 

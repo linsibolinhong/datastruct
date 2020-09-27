@@ -18,4 +18,5 @@ func Test_BSTree(t *testing.T) {
 	fmt.Println(sl)
 	tree.Delete(sl[1])
 	fmt.Println(tree.Slice())
+	fmt.Println(tree.Search(sl[2]))
 }

@@ -4,6 +4,8 @@ import (
 	"github.com/linsibolinhong/datastruct/compare"
 )
 
+type Compare func(a, b interface{}) int
+
 type BSTreeNode struct {
 	Value  compare.Comparer
 	Left   *BSTreeNode
@@ -27,6 +29,26 @@ func (t *BSTreeNode) Slice() []compare.Comparer {
 	ret = append(ret, t.Right.Slice()...)
 
 	return ret
+}
+
+func (t *BSTreeNode) CalcHeight() {
+	if t== nil {
+		return
+	}
+	t.Height = 0
+
+	if t.Left != nil {
+		t.Left.CalcHeight()
+		t.Height = t.Left.Height + 1
+	}
+
+	if t.Right != nil {
+		t.Right.CalcHeight()
+		if t.Height < t.Right.Height + 1 {
+			t.Height = t.Right.Height + 1
+		}
+	}
+
 }
 
 func (t *BSTreeNode) InsertNode(node *BSTreeNode) {
@@ -205,6 +227,7 @@ func (t *BasicBSTree) Delete(val compare.Comparer) bool {
 
 	return found
 }
+
 
 func (t *BasicBSTree) Slice() []compare.Comparer {
 	return t.Root.Slice()

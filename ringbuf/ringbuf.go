@@ -5,9 +5,9 @@ import (
 )
 
 type RingBuffer struct {
-	buf []byte
+	buf   []byte
 	begin int
-	end int
+	end   int
 
 	isEmpty bool
 }
@@ -67,11 +67,11 @@ func (r *RingBuffer) Write(data []byte) int {
 		return -1
 	}
 
-	if n <= r.Size() - r.End() {
-		copy(r.buf[r.End():r.End() + n], data)
+	if n <= r.Size()-r.End() {
+		copy(r.buf[r.End():r.End()+n], data)
 	} else {
-		copy(r.buf[r.End():],data[:r.Size() - r.End()])
-		copy(r.buf[:n - r.Size() + r.End()], data[r.Size() - r.End():])
+		copy(r.buf[r.End():], data[:r.Size()-r.End()])
+		copy(r.buf[:n-r.Size()+r.End()], data[r.Size()-r.End():])
 	}
 	r.end = (r.end + n) % r.Size()
 	r.isEmpty = false
@@ -133,7 +133,7 @@ func (r *RingBuffer) ReadDataAt(data []byte, idx int) int {
 		}
 		usedSize := r.End() - idx
 		if n <= usedSize {
-			copy(data, r.buf[idx:idx+ n])
+			copy(data, r.buf[idx:idx+n])
 			return n
 		} else {
 			copy(data, r.buf[idx:r.End()])
@@ -147,13 +147,13 @@ func (r *RingBuffer) ReadDataAt(data []byte, idx int) int {
 			return 0
 		}
 		if idx >= r.Begin() {
-			if n <= r.Size() - idx {
-				copy(data, r.buf[idx:idx + n])
+			if n <= r.Size()-idx {
+				copy(data, r.buf[idx:idx+n])
 				return n
 			} else {
 				copy(data, r.buf[idx:r.Size()])
 				copied := r.Size() - idx
-				if n - copied <= r.End() {
+				if n-copied <= r.End() {
 					copy(data[copied:], r.buf[:n-copied])
 					return n
 				} else {
@@ -162,8 +162,8 @@ func (r *RingBuffer) ReadDataAt(data []byte, idx int) int {
 				}
 			}
 		} else {
-			if n <= r.End() - idx {
-				copy(data, r.buf[idx:idx+ n])
+			if n <= r.End()-idx {
+				copy(data, r.buf[idx:idx+n])
 				return n
 			} else {
 				copy(data, r.buf[idx:r.End()])
@@ -194,7 +194,7 @@ func (r *RingBuffer) Read(n int) ([]byte, int) {
 func (r *RingBuffer) Detail() string {
 	udata, _ := r.ReadAt(r.UsedSize(), r.begin)
 	return fmt.Sprintf("size:%d\nbegin:%d\nend:%d\nused:%d\nfree:%d\ndata:%s\n",
-		r.Size(),r.Begin(), r.End(), r.UsedSize(), r.FreeSize(), string(udata))
+		r.Size(), r.Begin(), r.End(), r.UsedSize(), r.FreeSize(), string(udata))
 }
 
 func (r *RingBuffer) ReadDataWithOffset(data []byte, offset int) int {
@@ -239,7 +239,7 @@ func (r *RingBuffer) RemoveAt(idx, n int) (ret int) {
 			return -1
 		}
 
-		if r.End() - idx < n {
+		if r.End()-idx < n {
 			return -1
 		}
 
@@ -252,11 +252,11 @@ func (r *RingBuffer) RemoveAt(idx, n int) (ret int) {
 		}
 
 		if idx >= r.Begin() {
-			if r.End() + r.Size() - idx < n {
+			if r.End()+r.Size()-idx < n {
 				return -1
 			}
 
-			if n + idx < r.Size() {
+			if n+idx < r.Size() {
 				copy(r.buf[idx:], r.buf[idx+n:])
 				if n < r.End() {
 					copy(r.buf[:], r.buf[n:r.End()])
@@ -274,7 +274,7 @@ func (r *RingBuffer) RemoveAt(idx, n int) (ret int) {
 				return n
 			}
 		} else {
-			if n <= r.End() - idx {
+			if n <= r.End()-idx {
 				copy(r.buf[idx:], r.buf[idx+n:r.End()])
 				r.end -= n
 				return n
@@ -289,7 +289,7 @@ func (r *RingBuffer) Remove(offset, n int) int {
 	if n < 0 || n >= r.Size() {
 		return -1
 	}
-	return r.RemoveAt((r.begin + offset) % r.Size(), n)
+	return r.RemoveAt((r.begin+offset)%r.Size(), n)
 }
 
 func (r *RingBuffer) Clear() {
@@ -297,5 +297,3 @@ func (r *RingBuffer) Clear() {
 	r.end = 0
 	r.isEmpty = true
 }
-
-
